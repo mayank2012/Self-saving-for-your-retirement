@@ -1,0 +1,45 @@
+{
+  "name": "blk-hacking-retirement-savings",
+  "version": "1.0.0",
+  "description": "BlackRock Retirement Auto-Savings Challenge - Production REST API",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "lint": "eslint src/**/*.ts",
+    "docker:build": "docker build -t blk-hacking-ind-mayank .",
+    "docker:run": "docker run -p 5477:5477 blk-hacking-ind-mayank"
+  },
+  "keywords": [
+    "retirement",
+    "auto-savings",
+    "financial-api",
+    "fastify"
+  ],
+  "author": "Mayank",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.25.2",
+    "zod": "^3.22.4",
+    "luxon": "^3.4.1",
+    "pino": "^8.17.2",
+    "pino-pretty": "^10.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/luxon": "^3.3.7",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "eslint": "^8.56.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0",
+    "supertest": "^6.3.3",
+    "@types/supertest": "^6.0.2"
+  }
+}

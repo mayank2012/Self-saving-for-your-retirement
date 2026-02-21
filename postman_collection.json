@@ -1,0 +1,528 @@
+{
+  "info": {
+    "name": "BlackRock Retirement Auto-Savings Challenge",
+    "description": "Complete test suite for REST API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "GET Health Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response body contains status ok', function () {",
+                  "    pm.expect(pm.response.json().status).to.eql('ok');",
+                  "});",
+                  "",
+                  "pm.test('Response has timestamp', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Performance Metrics",
+      "item": [
+        {
+          "name": "GET Performance Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/performance",
+              "host": ["{{base_url}}"],
+              "path": ["performance"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains required metrics', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('total_processing_time_ms');",
+                  "    pm.expect(jsonData).to.have.property('memory_used_mb');",
+                  "    pm.expect(jsonData).to.have.property('thread_count');",
+                  "    pm.expect(jsonData).to.have.property('cpu_usage_percent');",
+                  "});",
+                  "",
+                  "pm.test('Processing time is positive', function () {",
+                  "    pm.expect(pm.response.json().total_processing_time_ms).to.be.greaterThan(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API Documentation",
+      "item": [
+        {
+          "name": "GET API Docs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/docs",
+              "host": ["{{base_url}}"],
+              "path": ["docs"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains API info', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('title');",
+                  "    pm.expect(jsonData).to.have.property('version');",
+                  "    pm.expect(jsonData).to.have.property('endpoints');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "POST Parse Transactions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"expenses\": [{\"date\": \"2024-01-15T10:30:00Z\", \"amount\": 250}, {\"date\": \"2024-01-20T14:15:00Z\", \"amount\": 100}], \"q_periods\": [{\"fixed\": 75, \"start\": \"2024-01-01T00:00:00Z\", \"end\": \"2024-01-31T23:59:59Z\"}], \"p_periods\": [{\"extra\": 25, \"start\": \"2024-01-01T00:00:00Z\", \"end\": \"2024-01-31T23:59:59Z\"}], \"k_periods\": [{\"start\": \"2024-01-01T00:00:00Z\", \"end\": \"2024-01-31T23:59:59Z\"}]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/parse",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "parse"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains transactions array', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('transactions');",
+                  "    pm.expect(jsonData.transactions).to.be.an('array');",
+                  "    pm.expect(jsonData).to.have.property('count');",
+                  "});",
+                  "",
+                  "pm.test('Transaction has required fields', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.transactions[0]).to.have.property('date');",
+                  "    pm.expect(jsonData.transactions[0]).to.have.property('amount');",
+                  "    pm.expect(jsonData.transactions[0]).to.have.property('ceiling');",
+                  "    pm.expect(jsonData.transactions[0]).to.have.property('remanent');",
+                  "});",
+                  "",
+                  "pm.test('Ceiling is correctly calculated', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    let tx = jsonData.transactions[0];",
+                  "    pm.expect(tx.ceiling).to.equal(300);",
+                  "    pm.expect(tx.remanent).to.equal(75); // q-period override + p-period extra",
+                  "});",
+                  "",
+                  "pm.test('Processing time header present', function () {",
+                  "    pm.expect(pm.response.headers.get('X-Processing-Time-Ms')).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Validate Transactions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"expenses\": [{\"date\": \"2024-01-15T10:30:00Z\", \"amount\": 250}, {\"date\": \"2024-01-20T14:15:00Z\", \"amount\": 150}], \"q_periods\": [{\"fixed\": 50, \"start\": \"2024-01-01T00:00:00Z\", \"end\": \"2024-01-31T23:59:59Z\"}], \"p_periods\": [], \"k_periods\": []}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/validate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "validate"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains validation fields', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('valid');",
+                  "    pm.expect(jsonData).to.have.property('errors');",
+                  "    pm.expect(jsonData).to.have.property('duplicates_detected');",
+                  "    pm.expect(jsonData).to.have.property('transaction_count');",
+                  "});",
+                  "",
+                  "pm.test('Valid data passes validation', function () {",
+                  "    pm.expect(pm.response.json().valid).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test('No duplicates in valid data', function () {",
+                  "    pm.expect(pm.response.json().duplicates_detected).to.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Filter by Periods",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"expenses\": [{\"date\": \"2024-01-15T10:30:00Z\", \"amount\": 250}, {\"date\": \"2024-01-20T14:15:00Z\", \"amount\": 100}, {\"date\": \"2024-02-05T12:00:00Z\", \"amount\": 200}], \"q_periods\": [], \"p_periods\": [], \"k_periods\": [{\"start\": \"2024-01-01T00:00:00Z\", \"end\": \"2024-01-31T23:59:59Z\"}, {\"start\": \"2024-02-01T00:00:00Z\", \"end\": \"2024-02-29T23:59:59Z\"}]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/filter",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "filter"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains k-period groups', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('filtered_transactions');",
+                  "    pm.expect(jsonData).to.have.property('k_period_groups');",
+                  "});",
+                  "",
+                  "pm.test('Filtered transactions are grouped by k-period', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(Object.keys(jsonData.k_period_groups).length).to.be.greaterThan(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Returns Calculations",
+      "item": [
+        {
+          "name": "POST Calculate NPS Deduction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"age\": 35, \"annual_income\": 1000000, \"invested\": 150000, \"years\": 5}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/returns/nps",
+              "host": ["{{base_url}}"],
+              "path": ["api", "returns", "nps"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains NPS calculation fields', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('contribution_base');",
+                  "    pm.expect(jsonData).to.have.property('nps_deduction');",
+                  "    pm.expect(jsonData).to.have.property('annual_nps_benefit');",
+                  "    pm.expect(jsonData).to.have.property('tax_benefit_percent');",
+                  "    pm.expect(jsonData).to.have.property('years');",
+                  "});",
+                  "",
+                  "pm.test('NPS deduction is within limits', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.nps_deduction).to.be.lessThanOrEqual(200000);",
+                  "    pm.expect(jsonData.nps_deduction).to.be.lessThanOrEqual(jsonData.contribution_base);",
+                  "});",
+                  "",
+                  "pm.test('Tax benefit is positive', function () {",
+                  "    pm.expect(pm.response.json().annual_nps_benefit).to.be.greaterThanOrEqual(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Calculate Index Fund Returns",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"annual_return_rate\": 0.08, \"inflation_rate\": 0.05, \"years\": 10}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/returns/index",
+              "host": ["{{base_url}}"],
+              "path": ["api", "returns", "index"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains index fund calculation fields', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('principal');",
+                  "    pm.expect(jsonData).to.have.property('rate');",
+                  "    pm.expect(jsonData).to.have.property('years');",
+                  "    pm.expect(jsonData).to.have.property('amount_nominal');",
+                  "    pm.expect(jsonData).to.have.property('amount_real');",
+                  "});",
+                  "",
+                  "pm.test('Nominal amount is greater than inflation-adjusted amount', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    let realAmount = parseFloat(jsonData.amount_real);",
+                  "    pm.expect(jsonData.amount_nominal).to.be.greaterThan(realAmount);",
+                  "});",
+                  "",
+                  "pm.test('Years matches request', function () {",
+                  "    pm.expect(pm.response.json().years).to.equal(10);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Error Cases",
+      "item": [
+        {
+          "name": "POST Invalid Transaction Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"expenses\": [{\"date\": \"invalid-date\", \"amount\": 250}], \"q_periods\": [], \"p_periods\": [], \"k_periods\": []}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/parse",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "parse"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error response contains details', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData).to.have.property('details');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Duplicate Timestamps",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"expenses\": [{\"date\": \"2024-01-15T10:30:00Z\", \"amount\": 250}, {\"date\": \"2024-01-15T10:30:00Z\", \"amount\": 100}], \"q_periods\": [], \"p_periods\": [], \"k_periods\": []}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/validate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "validate"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 422 (Unprocessable Entity)', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test('Validation fails due to duplicates', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.valid).to.be.false;",
+                  "    pm.expect(jsonData.duplicates_detected.length).to.be.greaterThan(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Invalid NPS Calculation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"age\": 200, \"annual_income\": -1000, \"invested\": \"invalid\", \"years\": 0}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/returns/nps",
+              "host": ["{{base_url}}"],
+              "path": ["api", "returns", "nps"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error response contains validation details', function () {",
+                  "    let jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5477",
+      "type": "string"
+    }
+  ]
+}
